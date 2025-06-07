@@ -109,10 +109,12 @@ export default class LinkedList {
     }
     return str + 'null';
   }
-}
 
-let list = new LinkedList();
-list.push('Denmark', 'Copenhagen');
-list.push('Sweden', 'Stockholm');
-list.push('Finland', 'Helsinki');
-list.push('Norway', 'Oslo');
+  keyValueArray() {
+    let array = [];
+    for (let node = this.#head; node !== null; node = node.next) {
+      array.push([node.key, node.value]);
+    }
+    return array;
+  }
+}
