@@ -70,13 +70,12 @@ export default class LinkedList {
   }
 
   get(key) {
-    if (!this.isEmpty()) {
-      for (let node = this.#head; node !== null; node = node.next) {
-        if (node.key === key) {
-          return node.value;
-        }
+    for (let node = this.#head; node !== null; node = node.next) {
+      if (node.key === key) {
+        return node.value;
       }
     }
+
     return null;
   }
 

@@ -3,12 +3,12 @@ export default class HashMap {
   #buckets;
   #capacity;
   #loadFactor;
-  #occupiedBuckets;
+  #size;
   constructor() {
     this.#buckets = [];
-    this.#occupiedBuckets = 0;
     this.#capacity = 16;
     this.#loadFactor = 0.75;
+    this.#size = 0;
   }
 
   #hash(key) {
@@ -22,17 +22,19 @@ export default class HashMap {
 
   #resize() {
     let newArray = [];
-    this.#occupiedBuckets = 0;
+    this.#size = 0;
     for (let i = 0; i < this.#capacity; i++) {
       if (this.#buckets[i]) {
         this.#buckets[i].keyValueArray().forEach(([key, value]) => {
           let index = this.#hash(key);
           if (newArray[index]) {
+            let currentSize = newArray[index].size();
             newArray[index].push(key, value);
+            if (newArray[index].size() > currentSize) this.#size++;
           } else {
             newArray[index] = new LinkedList();
             newArray[index].push(key, value);
-            this.#occupiedBuckets++;
+            this.#size++;
           }
         });
       }
@@ -41,9 +43,7 @@ export default class HashMap {
   }
 
   #isFull() {
-    return (
-      this.#occupiedBuckets >= Math.ceil(this.#loadFactor * this.#capacity)
-    );
+    return this.length() >= Math.ceil(this.#loadFactor * this.#capacity);
   }
 
   set(key, value) {
@@ -56,12 +56,14 @@ export default class HashMap {
       throw new Error('Trying to access index out of bounds');
     }
     if (this.#buckets[index]) {
+      let currentSize = this.#buckets[index].size();
       this.#buckets[index].push(key, value);
+      if (this.#buckets[index].size() > currentSize) this.#size++;
       return;
     }
     this.#buckets[index] = new LinkedList();
     this.#buckets[index].push(key, value);
-    this.#occupiedBuckets++;
+    this.#size++;
   }
 
   get(key) {
@@ -76,8 +78,20 @@ export default class HashMap {
   }
 
   has(key) {
-    if (this.get(key)) {
-      return true;
+    let index = this.#hash(key);
+    if (index < 0 || index >= this.#capacity) {
+      throw new Error('Trying to access index out of bounds');
+    }
+    if (this.#buckets[index]) {
+      for (
+        let node = this.#buckets[index].head();
+        node !== null;
+        node = node.next
+      ) {
+        if (node.key === key) {
+          return true;
+        }
+      }
     }
     return false;
   }
@@ -86,28 +100,20 @@ export default class HashMap {
     let index = this.#hash(key);
     if (this.has(key)) {
       this.#buckets[index].remove(key);
-      if (this.#buckets[index].isEmpty()) {
-        this.#occupiedBuckets--;
-      }
+      this.#size--;
       return true;
     }
     return false;
   }
 
   length() {
-    let len = 0;
-    for (let i = 0; i < this.#buckets.length; i++) {
-      if (this.#buckets[i]) {
-        len += this.#buckets[i].size();
-      }
-    }
-    return len;
+    return this.#size;
   }
 
   clear() {
     this.#buckets = [];
     this.#capacity = 16;
-    this.#occupiedBuckets = 0;
+    this.#size = 0;
   }
 
   keys() {
