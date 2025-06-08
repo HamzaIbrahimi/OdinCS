@@ -43,6 +43,7 @@ export default class HashSet {
         });
       }
     }
+    this.#buckets = newArray;
   }
 
   #isFull() {
