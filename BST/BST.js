@@ -30,18 +30,26 @@ export default class Tree {
     let temp = this.root;
     let parent = null;
     while (temp !== null) {
-      if (value > temp.data) {
-        parent = temp;
-        temp = temp.right;
-      } else if (value < temp.data) {
-        parent = temp;
-        temp = temp.left;
-      } else {
-        return;
-      }
+      parent = temp;
+      if (value > temp.data) temp = temp.right;
+      else if (value < temp.data) temp = temp.left;
+      else return;
     }
     const newNode = new Node(value);
     value > parent.data ? (parent.right = newNode) : (parent.left = newNode);
+  }
+
+  recInsert(value) {
+    const go = (node) => {
+      if (node === null) {
+        return new Node(value);
+      }
+      if (value > node.data) node.right = go(node.right);
+      if (value < node.data) node.left = go(node.left);
+
+      return node;
+    };
+    this.root = go(this.root);
   }
 
   find(value) {
@@ -56,9 +64,66 @@ export default class Tree {
     }
     return null;
   }
+
+  recFind(value) {
+    const go = (node) => {
+      if (node === null) return null;
+      if (value === node.data) return node;
+      if (value < node.data) return go(node.left);
+      return go(node.right);
+    };
+    return go(this.root);
+  }
+
+  delete(node, key) {
+    if (node === null) return null;
+    if (key < node.data) {
+      node.left = this.delete(node.left, key);
+    } else if (key > node.data) {
+      node.right = this.delete(node.right, key);
+    } else {
+      if (node.left === null && node.right === null) {
+        return null;
+      }
+      if (node.left === null) {
+        return node.right;
+      }
+      if (node.right === null) {
+        return node.left;
+      } else {
+        let succ = this.inOrd(node.right);
+        node.data = succ.data;
+        node.right = this.delete(node.right, succ.data);
+        return node;
+      }
+    }
+    return node;
+  }
+
+  inPre(node) {
+    //left subtree then go to the right-most leaf find the maximum value
+    while (node && node.right !== null) {
+      node = node.right;
+    }
+    return node;
+  }
+
+  inOrd(node) {
+    //right subtree then go to the left-most leaf find the minium value
+    while (node && node.left !== null) {
+      node = node.left;
+    }
+    return node;
+  }
+
+  height(node) {
+    if (node === null) return -1;
+    let x = this.height(node.left);
+    let y = this.height(node.right);
+    return Math.max(x, y) + 1;
+  }
 }
 
-let check = new Tree([1, 7, 4, 23, 8, 9, 4, 3, 5, 7, 9, 67, 6345, 324]);
+let tree = new Tree([1, 7, 4, 23, 8, 9, 4, 3, 5, 7, 9, 67, 6345, 324]);
 
-prettyPrint(check.root);
-console.log(check.find(4));
+let ch = new Tree();
