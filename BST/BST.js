@@ -1,4 +1,5 @@
 import { prettyPrint } from './print.js';
+import Queue from './Queue.js';
 class Node {
   constructor(data) {
     this.left = null;
@@ -116,14 +117,98 @@ export default class Tree {
     return node;
   }
 
-  height(node) {
-    if (node === null) return -1;
-    let x = this.height(node.left);
-    let y = this.height(node.right);
-    return Math.max(x, y) + 1;
+  height(value) {
+    let fNode = this.recFind(value);
+    if (fNode === null) {
+      return null;
+    }
+
+    const getHeight = (node) => {
+      if (node === null) return -1;
+      let x = getHeight(node.left);
+      let y = getHeight(node.right);
+      return Math.max(x, y) + 1;
+    };
+
+    return getHeight(fNode);
+  }
+
+  depth(value) {
+    let temp = this.root;
+    let count = 0;
+    while (temp !== null) {
+      if (value < temp.data) {
+        temp = temp.left;
+        count++;
+      } else if (value > temp.data) {
+        temp = temp.right;
+        count++;
+      } else {
+        return count;
+      }
+    }
+    return null;
+  }
+
+  levelOrder(callback) {
+    if (typeof callback !== 'function') {
+      throw new Error(
+        'A callback function is required for the levelOrder method'
+      );
+    }
+    let queue = new Queue();
+    if (this.root === null) {
+      throw new Error("There's no tree to follow");
+    }
+    queue.enqueue(this.root);
+    while (!queue.isEmpty()) {
+      let currentNode = queue.dequeue();
+      callback(currentNode.data);
+      if (currentNode.data.left) {
+        queue.enqueue(currentNode.data.left);
+      }
+      if (currentNode.data.right) {
+        queue.enqueue(currentNode.data.right);
+      }
+    }
+  }
+  inOrder(node, callback) {
+    if (typeof callback !== 'function') {
+      throw new Error(
+        'A callback function is required for the levelOrder method'
+      );
+    }
+    if (node) {
+      this.inOrder(node.left, callback);
+      callback(node);
+      this.inOrder(node.right, callback);
+    }
+  }
+  preOrder(node, callback) {
+    if (typeof callback !== 'function') {
+      throw new Error(
+        'A callback function is required for the levelOrder method'
+      );
+    }
+    if (node) {
+      callback(node);
+      this.inOrder(node.left, callback);
+      this.inOrder(node.right, callback);
+    }
+  }
+  postOrder(node, callback) {
+    if (typeof callback !== 'function') {
+      throw new Error(
+        'A callback function is required for the levelOrder method'
+      );
+    }
+    if (node) {
+      this.inOrder(node.left, callback);
+      this.inOrder(node.right, callback);
+      callback(node);
+    }
   }
 }
 
 let tree = new Tree([1, 7, 4, 23, 8, 9, 4, 3, 5, 7, 9, 67, 6345, 324]);
-
-let ch = new Tree();
+prettyPrint(tree.root);
