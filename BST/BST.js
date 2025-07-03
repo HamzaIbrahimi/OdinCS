@@ -1,4 +1,3 @@
-import { prettyPrint } from './print.js';
 import Queue from './Queue.js';
 class Node {
   constructor(data) {
@@ -118,7 +117,7 @@ export default class Tree {
   }
 
   height(value) {
-    let fNode = this.recFind(value);
+    let fNode = this.find(value);
     if (fNode === null) {
       return null;
     }
@@ -172,6 +171,7 @@ export default class Tree {
       }
     }
   }
+
   inOrder(node, callback) {
     if (typeof callback !== 'function') {
       throw new Error(
@@ -184,6 +184,7 @@ export default class Tree {
       this.inOrder(node.right, callback);
     }
   }
+
   preOrder(node, callback) {
     if (typeof callback !== 'function') {
       throw new Error(
@@ -196,6 +197,7 @@ export default class Tree {
       this.inOrder(node.right, callback);
     }
   }
+
   postOrder(node, callback) {
     if (typeof callback !== 'function') {
       throw new Error(
@@ -208,7 +210,38 @@ export default class Tree {
       callback(node);
     }
   }
-}
 
-let tree = new Tree([1, 7, 4, 23, 8, 9, 4, 3, 5, 7, 9, 67, 6345, 324]);
-prettyPrint(tree.root);
+  isBalanced() {
+    if (this.root === null) return true;
+    let queue = new Queue();
+    queue.enqueue(this.root);
+    while (!queue.isEmpty()) {
+      let currentNode = queue.dequeue();
+      let leftHeight = currentNode.data.left
+        ? this.height(currentNode.data.left.data)
+        : -1;
+      let rightHeight = currentNode.data.right
+        ? this.height(currentNode.data.right.data)
+        : -1;
+      if (Math.abs(leftHeight - rightHeight) > 1) {
+        return false;
+      }
+      if (currentNode.data.left) {
+        queue.enqueue(currentNode.data.left);
+      }
+      if (currentNode.data.right) {
+        queue.enqueue(currentNode.data.right);
+      }
+    }
+    return true;
+  }
+
+  rebalance() {
+    if (this.isBalanced()) {
+      throw new Error('Tree is already Balanced!');
+    }
+    const arr = [];
+    this.inOrder(this.root, (x) => arr.push(x.data));
+    this.root = this.#buildTree(arr, 0, arr.length - 1);
+  }
+}
