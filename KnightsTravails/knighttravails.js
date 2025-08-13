@@ -45,24 +45,53 @@ function containsPosition(position, array) {
     return false;
 }
 
-function knightMoves(s, d) {
+function constructPath(o, s, d, a) {
+    if (o[d] === null) {
+        a.push(s);
+        let path = a.reverse();
+        let msg = `You made it in ${a.length - 1} moves! Here's your path: \n`;
+        for (const move of path) {
+            msg += `[${move}]\n`;
+        }
+        return msg.trim();
+    }
+    let pos = o[d];
+    a.push(d);
+    return constructPath(o, s, pos, a);
+}
+
+function validMove(move) {
+    if (move[0] < 0 || move[0] > 7 || move[1] < 0 || move[1] > 7) {
+        return false;
+    }
+    return true;
+}
+
+function KnightMoves(s, d) {
+    if (!validMove(s) || !validMove(d)) {
+        throw new Error('Illegal source or destination');
+    }
     const visited = [];
     const q = new Queue();
     q.enqueue(s);
     visited.push(s);
+    let o = {};
+    o[s] = null;
     while (!q.isEmpty()) {
         let currPosition = q.dequeue();
         for (let position of possiblePositions(currPosition)) {
             if (!containsPosition(position, visited)) {
                 q.enqueue(position);
                 visited.push(position);
-                if (containsPosition(d, visited)) {
-                    return visited;
-                }
+                o[position] = currPosition;
             }
         }
+        if (o[d]) {
+            break;
+        }
     }
-    return visited;
+    return constructPath(o, s, d, []);
 }
 
-console.log(knightMoves([0, 0], [3, 3]));
+let o = KnightMoves([0, 0], [7, 7]);
+console.log(o);
