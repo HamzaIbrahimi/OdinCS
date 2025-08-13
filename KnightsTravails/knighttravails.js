@@ -5,7 +5,7 @@ function possiblePositions(position) {
     let [x, y] = [position[0], position[1]];
     for (let move of exactMoves()) {
         let curr = [x + move[0], y + move[1]];
-        if (curr[0] < 0 || curr[0] > 7 || curr[1] < 0 || curr[1] > 7) {
+        if (!validMove(curr)) {
             continue;
         } else {
             moves.push(curr);
